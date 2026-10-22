@@ -4,25 +4,26 @@ import { api } from "@/lib/fetcher";
 export interface Payment {
   id: string;
   amount: number;
-  method: string;
-  reference: string | null;
+  paymentMethod: string;
+  transactionRef: string | null;
+  paymentDate: string;
   notes: string | null;
   createdAt: string;
   booking: {
     id: string;
-    bookingNumber: string;
     totalAmount: number;
     paymentStatus: string;
-    customer: { firstName: string; lastName: string };
-    vehicle: { make: string; model: string; licensePlate: string };
+    customer: { fullName: string };
+    vehicle: { make: string; model: string; registrationNumber: string };
   };
 }
 
 export interface PaymentPayload {
   bookingId: string;
   amount: number;
-  method: string;
-  reference?: string;
+  paymentMethod: string;
+  transactionRef?: string;
+  paymentDate: string;
   notes?: string;
 }
 

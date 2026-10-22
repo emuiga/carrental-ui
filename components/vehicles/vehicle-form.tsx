@@ -28,7 +28,7 @@ const schema = z.object({
   make: z.string().min(1, "Required"),
   model: z.string().min(1, "Required"),
   year: z.coerce.number().int().min(1980).max(new Date().getFullYear() + 1),
-  licensePlate: z.string().min(1, "Required"),
+  registrationNumber: z.string().min(1, "Required"),
   category: z.string().min(1, "Required"),
   dailyRate: z.coerce.number().positive("Must be positive"),
   color: z.string().optional(),
@@ -56,7 +56,7 @@ export function VehicleForm({ defaultValues, onSubmit, loading, showStatus }: Pr
       make: defaultValues?.make ?? "",
       model: defaultValues?.model ?? "",
       year: defaultValues?.year ?? new Date().getFullYear(),
-      licensePlate: defaultValues?.licensePlate ?? "",
+      registrationNumber: defaultValues?.registrationNumber ?? "",
       category: defaultValues?.category ?? "",
       dailyRate: defaultValues?.dailyRate ?? 0,
       color: defaultValues?.color ?? "",
@@ -97,7 +97,7 @@ export function VehicleForm({ defaultValues, onSubmit, loading, showStatus }: Pr
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="licensePlate" render={({ field }) => (
+          <FormField control={form.control} name="registrationNumber" render={({ field }) => (
             <FormItem>
               <FormLabel>License Plate</FormLabel>
               <FormControl><Input placeholder="KAA 123A" className="uppercase" {...field} /></FormControl>
@@ -112,8 +112,8 @@ export function VehicleForm({ defaultValues, onSubmit, loading, showStatus }: Pr
                   <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {["economy", "compact", "midsize", "suv", "luxury", "van", "truck"].map((c) => (
-                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                  {["small", "sedan", "suv", "van", "seven_seater"].map((c) => (
+                    <SelectItem key={c} value={c} className="capitalize">{c.replace("_", " ")}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

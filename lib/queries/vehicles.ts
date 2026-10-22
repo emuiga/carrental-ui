@@ -6,7 +6,7 @@ export interface Vehicle {
   make: string;
   model: string;
   year: number;
-  licensePlate: string;
+  registrationNumber: string;
   category: string;
   status: string;
   dailyRate: number;
@@ -23,7 +23,7 @@ export interface VehiclePayload {
   make: string;
   model: string;
   year: number;
-  licensePlate: string;
+  registrationNumber: string;
   category: string;
   dailyRate: number;
   color?: string;

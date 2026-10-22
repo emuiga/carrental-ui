@@ -1,28 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetcher";
+import type { Payment } from "@/lib/queries/payments";
 
 export interface Booking {
   id: string;
-  bookingNumber: string;
   status: string;
   paymentStatus: string;
   startDate: string;
   endDate: string;
+  dailyRate: number;
   totalAmount: number;
+  depositPaid: number;
   notes: string | null;
+  pickupLocation: string | null;
+  returnLocation: string | null;
+  startMileage: number | null;
+  endMileage: number | null;
   createdAt: string;
-  vehicle: { id: string; make: string; model: string; licensePlate: string };
-  customer: { id: string; firstName: string; lastName: string; phone: string };
+  vehicle: { id: string; make: string; model: string; registrationNumber: string };
+  customer: { id: string; fullName: string; phone: string };
   payments?: Payment[];
-}
-
-export interface Payment {
-  id: string;
-  amount: number;
-  method: string;
-  reference: string | null;
-  notes: string | null;
-  createdAt: string;
 }
 
 export interface BookingPayload {
@@ -30,8 +27,20 @@ export interface BookingPayload {
   customerId: string;
   startDate: string;
   endDate: string;
-  totalAmount: number;
+  depositPaid?: number;
   notes?: string;
+  pickupLocation?: string;
+  returnLocation?: string;
+  startMileage?: number;
+}
+
+export interface BookingUpdatePayload {
+  notes?: string;
+  pickupLocation?: string;
+  returnLocation?: string;
+  startMileage?: number;
+  endMileage?: number;
+  depositPaid?: number;
 }
 
 export function useBookings(params?: Record<string, string>) {
@@ -76,7 +85,7 @@ export function useUpdateBookingStatus(id: string) {
 export function useUpdateBooking(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<BookingPayload>) => api.patch(`/api/bookings/${id}`, data),
+    mutationFn: (data: BookingUpdatePayload) => api.patch(`/api/bookings/${id}`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["bookings"] });
       qc.invalidateQueries({ queryKey: ["bookings", id] });

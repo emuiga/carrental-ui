@@ -3,29 +3,33 @@ import { api } from "@/lib/fetcher";
 
 export interface Customer {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
+  idNumber: string;
+  customerType: string;
+  drivingLicense: string | null;
+  licenseExpiry: string | null;
+  phone: string | null;
   email: string | null;
-  phone: string;
-  idType: string | null;
-  idNumber: string | null;
-  type: string;
   address: string | null;
-  notes: string | null;
+  nextOfKinName: string | null;
+  nextOfKinPhone: string | null;
+  employerDetails: string | null;
   createdAt: string;
   _count?: { bookings: number };
 }
 
 export interface CustomerPayload {
-  firstName: string;
-  lastName: string;
-  phone: string;
+  fullName: string;
+  idNumber: string;
+  customerType?: string;
+  drivingLicense?: string;
+  licenseExpiry?: string;
+  phone?: string;
   email?: string;
-  idType?: string;
-  idNumber?: string;
-  type?: string;
   address?: string;
-  notes?: string;
+  nextOfKinName?: string;
+  nextOfKinPhone?: string;
+  employerDetails?: string;
 }
 
 export function useCustomers(params?: Record<string, string>) {

@@ -26,6 +26,18 @@ export function formatDays(start: string | Date, end: string | Date): number {
   return Math.ceil(ms / (1000 * 60 * 60 * 24));
 }
 
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex++;
+  }
+  return `${value.toFixed(1)} ${units[unitIndex]}`;
+}
+
 export function slugify(str: string): string {
   return str
     .toLowerCase()
