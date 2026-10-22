@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { setToken } from "@/lib/fetcher";
 
@@ -30,6 +32,8 @@ const loginSchema = z.object({
   companySlug: z.string().optional(),
   email: z.string().email("Invalid email"),
   password: z.string().min(1, "Password required"),
+  rememberMe: z.boolean(),
+  acceptTerms: z.boolean().refine((v) => v, "You must accept the Terms & Conditions"),
 });
 
 const otpSchema = z.object({
@@ -80,9 +84,9 @@ function TwoFAStep({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">Two-factor authentication</h2>
-      <p className="text-sm text-gray-500 mb-6">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-foreground mb-1">Two-factor authentication</h2>
+      <p className="text-sm text-muted-foreground mb-6">
         Enter the 6-digit code from your authenticator app.
       </p>
 
@@ -119,7 +123,7 @@ function TwoFAStep({
           <button
             type="button"
             onClick={onBack}
-            className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Back to login
           </button>
@@ -139,8 +143,10 @@ export default function LoginPage() {
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema) as Resolver<any>,
-    defaultValues: { companySlug: "", email: "", password: "" },
+    defaultValues: { companySlug: "", email: "", password: "", rememberMe: true, acceptTerms: false },
   });
+
+  const acceptedTerms = form.watch("acceptTerms");
 
   async function onSubmit(data: LoginValues) {
     setLoading(true);
@@ -167,7 +173,7 @@ export default function LoginPage() {
         return;
       }
 
-      setToken(json.token);
+      setToken(json.token, data.rememberMe);
       router.push("/dashboard");
       router.refresh();
     } catch {
@@ -178,15 +184,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 mb-4">
-            <Car className="h-6 w-6 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary mb-4">
+            <Car className="h-6 w-6 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">FleetMS</h1>
-          <p className="text-sm text-gray-500 mt-1">Car Rental Management</p>
+          <h1 className="text-2xl font-bold text-foreground">FleetMS</h1>
+          <p className="text-sm text-muted-foreground mt-1">Car Rental Management</p>
         </div>
 
         {/* 2FA step */}
@@ -200,13 +206,13 @@ export default function LoginPage() {
           />
         ) : (
           /* Credentials step */
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Sign in</h2>
-            <p className="text-sm text-gray-500 mb-6">Enter your credentials to continue</p>
+          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-1">Sign in</h2>
+            <p className="text-sm text-muted-foreground mb-6">Enter your credentials to continue</p>
 
             {/* Superadmin toggle */}
-            <div className="flex items-center justify-between mb-5 pb-5 border-b border-gray-100">
-              <Label htmlFor="superadmin-toggle" className="text-sm text-gray-700 cursor-pointer">
+            <div className="flex items-center justify-between mb-5 pb-5 border-b border-border">
+              <Label htmlFor="superadmin-toggle" className="text-sm text-foreground cursor-pointer">
                 Sign in as superadmin
               </Label>
               <Switch
@@ -279,7 +285,40 @@ export default function LoginPage() {
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={loading}>
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} id="rememberMe" />
+                      </FormControl>
+                      <Label htmlFor="rememberMe" className="text-sm text-foreground font-normal cursor-pointer">
+                        Remember me
+                      </Label>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="acceptTerms"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start gap-2 space-y-0">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} id="acceptTerms" />
+                      </FormControl>
+                      <Label htmlFor="acceptTerms" className="text-sm text-foreground font-normal cursor-pointer">
+                        I agree to the{" "}
+                        <Link href="/terms" target="_blank" className="text-primary hover:underline">
+                          Terms &amp; Conditions
+                        </Link>
+                      </Label>
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign in
                 </Button>
