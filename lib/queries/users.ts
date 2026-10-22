@@ -6,23 +6,24 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  roleId: string;
+  roleRef: { id: string; name: string };
   isActive: boolean;
   createdAt: string;
 }
 
 export interface UserPayload {
   email: string;
-  password: string;
   firstName: string;
   lastName: string;
-  role: string;
+  roleId: string;
+  companyId?: string;
 }
 
-export function useUsers() {
+export function useUsers(companyId?: string) {
   return useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: () => api.get("/api/users"),
+    queryKey: ["users", companyId],
+    queryFn: () => api.get("/api/users", companyId ? { companyId } : undefined),
   });
 }
 
