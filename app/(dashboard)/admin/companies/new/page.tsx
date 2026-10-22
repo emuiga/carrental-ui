@@ -21,6 +21,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { slugify } from "@/lib/format";
 
 const schema = z.object({
@@ -29,6 +30,11 @@ const schema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().optional(),
   address: z.string().optional(),
+  adminFirstName: z.string().min(1, "Required"),
+  adminLastName: z.string().min(1, "Required"),
+  adminEmail: z.string().email("Invalid email"),
+  adminPassword: z.string().min(8, "At least 8 characters"),
+  approveImmediately: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -39,7 +45,18 @@ export default function NewCompanyPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<any>,
-    defaultValues: { name: "", slug: "", email: "", phone: "", address: "" },
+    defaultValues: {
+      name: "",
+      slug: "",
+      email: "",
+      phone: "",
+      address: "",
+      adminFirstName: "",
+      adminLastName: "",
+      adminEmail: "",
+      adminPassword: "",
+      approveImmediately: true,
+    },
   });
 
   function handleNameChange(name: string) {
@@ -123,6 +140,54 @@ export default function NewCompanyPage() {
                   </FormItem>
                 )} />
               </div>
+
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground pt-2">
+                Admin Account
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField control={form.control} name="adminFirstName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin First Name</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="adminLastName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Last Name</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+              <FormField control={form.control} name="adminEmail" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Admin Email</FormLabel>
+                  <FormControl><Input type="email" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="adminPassword" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Admin Password</FormLabel>
+                  <FormControl><Input type="password" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="approveImmediately" render={({ field }) => (
+                <FormItem className="flex flex-row items-start gap-2 space-y-0 pt-2">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-0.5 leading-none">
+                    <FormLabel className="font-normal">Approve immediately</FormLabel>
+                    <FormDescription>
+                      Leave unchecked to have this company go through the approvals queue instead.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )} />
 
               <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={createMutation.isPending}>
