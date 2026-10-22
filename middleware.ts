@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function decodeRole(token: string): string | undefined {
+function decodePermissions(token: string): string[] {
   try {
     const payload = token.split(".")[1];
     const json = Buffer.from(payload, "base64url").toString("utf8");
-    return JSON.parse(json).role;
+    return JSON.parse(json).permissions ?? [];
   } catch {
-    return undefined;
+    return [];
   }
 }
 
@@ -18,15 +18,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const role = decodeRole(token);
+  const permissions = decodePermissions(token);
+  const isPlatformLevel = permissions.includes("companies.manage");
 
-  // Superadmin hitting root or dashboard → send to admin panel
-  if ((pathname === "/" || pathname === "/dashboard") && role === "superadmin") {
-    return NextResponse.redirect(new URL("/admin/companies", req.url));
+  // Platform-level users hitting root or dashboard → send to admin panel
+  if ((pathname === "/" || pathname === "/dashboard") && isPlatformLevel) {
+    return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
-  // Non-superadmin trying to access admin panel → send to dashboard
-  if (pathname.startsWith("/admin") && role !== "superadmin") {
+  // Non-platform-level users trying to access admin panel → send to dashboard
+  if (pathname.startsWith("/admin") && !isPlatformLevel) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
@@ -34,6 +35,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Protect everything except API routes, static files, and login
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login).*)"],
+  // Protect everything except API routes, static files, login, password setup and terms
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|set-password|terms).*)"],
 };

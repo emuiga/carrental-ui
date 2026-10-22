@@ -1,9 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/use-session";
+import type { SessionUser } from "@/lib/permissions";
 import { clearToken } from "@/lib/fetcher";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ChangePasswordDialog } from "@/components/shared/change-password-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +18,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User as UserIcon, KeyRound, Palette, ChevronDown } from "lucide-react";
 
-export function TopNav() {
-  const { data: session } = useSession();
+export function TopNav({ session }: { session: SessionUser | null }) {
   const router = useRouter();
-  const user = session?.user;
+  const user = session;
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   function signOut() {
     clearToken();
@@ -29,40 +35,78 @@ export function TopNav() {
     : "U";
 
   return (
-    <header className="flex h-16 items-center justify-end border-b border-gray-200 bg-white px-6">
+    <header className="flex h-16 items-center justify-end border-b border-border bg-card px-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-50 transition-colors outline-none">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+          <button className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-accent transition-colors outline-none">
+            <Avatar className="h-8 w-8 border border-border">
+              <AvatarFallback className="bg-transparent text-muted-foreground text-xs font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium text-gray-900 leading-none">
+              <p className="text-sm font-medium text-foreground leading-none">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-gray-500 capitalize mt-0.5">{user?.role}</p>
+              <p className="text-xs text-muted-foreground capitalize mt-0.5">{user?.roleName}</p>
             </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-0.5">
               <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/profile">
+              <UserIcon className="mr-2 h-4 w-4" />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <div className="flex items-center justify-between px-2 py-1.5 text-sm">
+            <span className="flex items-center text-foreground">
+              <Palette className="mr-2 h-4 w-4" />
+              Appearance
+            </span>
+            <ThemeToggle />
+          </div>
+          <ChangePasswordDialog
+            trigger={
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+              >
+                <KeyRound className="mr-2 h-4 w-4" />
+                Change password
+              </DropdownMenuItem>
+            }
+          />
+          <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={signOut}
-            className="text-red-600 focus:text-red-600 cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              setLogoutOpen(true);
+            }}
+            className="text-destructive focus:text-destructive cursor-pointer"
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Sign out
+            Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ConfirmDialog
+        open={logoutOpen}
+        onOpenChange={setLogoutOpen}
+        title="Log out?"
+        description="You'll need to sign in again to access your account."
+        confirmLabel="Log out"
+        onConfirm={signOut}
+      />
     </header>
   );
 }

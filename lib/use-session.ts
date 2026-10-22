@@ -6,11 +6,13 @@ import { getToken } from "@/lib/fetcher";
 export type SessionUser = {
   id: string;
   email: string;
-  role: string;
   companyId: string | null;
   companySlug: string | null;
   firstName: string | null;
   lastName: string | null;
+  permissions: string[];
+  roleId: string;
+  roleName: string;
 };
 
 function decodeJwtPayload(token: string): SessionUser | null {

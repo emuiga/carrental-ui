@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "@/lib/use-session";
+import type { SessionUser } from "@/lib/permissions";
 import {
   LayoutDashboard,
   Car,
@@ -11,7 +11,7 @@ import {
   CreditCard,
   Settings,
   Building2,
-  ChevronRight,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,60 +30,61 @@ const navItems: NavItem[] = [
   { label: "Bookings", href: "/bookings", icon: CalendarCheck, companyOnly: true },
   { label: "Payments", href: "/payments", icon: CreditCard, companyOnly: true },
   { label: "Settings", href: "/settings", icon: Settings, companyOnly: true },
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, adminOnly: true },
   { label: "Companies", href: "/admin/companies", icon: Building2, adminOnly: true },
+  { label: "Approvals", href: "/admin/approvals", icon: ClipboardCheck, adminOnly: true },
 ];
 
-export function Sidebar() {
+export function Sidebar({ session }: { session: SessionUser | null }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const isSuperadmin = session?.user?.role === "superadmin";
+  const isPlatformLevel = session?.permissions.includes("companies.manage") ?? false;
 
   const visible = navItems.filter((item) => {
-    if (item.adminOnly) return isSuperadmin;
-    if (item.companyOnly) return !isSuperadmin;
+    if (item.adminOnly) return isPlatformLevel;
+    if (item.companyOnly) return !isPlatformLevel;
     return true;
   });
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-gray-200 bg-white">
+    <aside className="flex h-full w-60 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <Car className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <Car className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-sm font-bold text-gray-900">
-            {isSuperadmin ? "Admin HQ" : (session?.user?.companySlug ?? "FleetMS")}
+          <span className="text-sm font-bold text-sidebar-foreground">
+            {isPlatformLevel ? "Admin HQ" : (session?.companySlug ?? "FleetMS")}
           </span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-0.5">
+      <nav className="flex-1 overflow-y-auto px-3 py-5 text-sm">
+        <ul className="space-y-1.5">
           {visible.map((item) => {
             const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
-              <li key={item.href}>
+              <li key={item.href} className="relative">
+                {active && (
+                  <span className="absolute right-0 top-0 bottom-0 w-0.5 rounded-full bg-sidebar-primary" />
+                )}
                 <Link
                   href={item.href}
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "group flex items-center gap-3 rounded-lg px-3 py-3 font-medium transition-colors",
                     active
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
                   )}
                 >
                   <item.icon
                     className={cn(
-                      "h-4 w-4 shrink-0",
-                      active ? "text-blue-700" : "text-gray-400 group-hover:text-gray-600"
+                      "h-[18px] w-[18px] shrink-0",
+                      active ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"
                     )}
                   />
                   {item.label}
-                  {active && (
-                    <ChevronRight className="ml-auto h-3 w-3 text-blue-400" />
-                  )}
                 </Link>
               </li>
             );
@@ -92,13 +93,13 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 p-3">
-        <div className="rounded-lg bg-gray-50 px-3 py-2">
-          <p className="text-xs font-medium text-gray-900 truncate">
-            {session?.user?.firstName} {session?.user?.lastName}
+      <div className="border-t border-sidebar-border p-3">
+        <div className="rounded-lg bg-sidebar-accent/50 px-3 py-2">
+          <p className="text-xs font-medium text-sidebar-foreground truncate">
+            {session?.firstName} {session?.lastName}
           </p>
-          <p className="text-xs text-gray-500 capitalize truncate">
-            {session?.user?.role}
+          <p className="text-xs text-sidebar-foreground/60 capitalize truncate">
+            {session?.roleName}
           </p>
         </div>
       </div>
