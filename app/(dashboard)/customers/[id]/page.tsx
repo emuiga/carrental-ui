@@ -35,8 +35,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <Link href="/customers"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <PageHeader
-          title={isLoading ? "Loading..." : `${customer?.firstName} ${customer?.lastName}`}
-          description={customer?.phone}
+          title={isLoading ? "Loading..." : customer?.fullName ?? ""}
+          description={customer?.phone ?? undefined}
         />
       </div>
 
@@ -55,7 +55,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               loading={updateMutation.isPending}
             />
           ) : (
-            <p className="text-gray-500">Customer not found.</p>
+            <p className="text-muted-foreground">Customer not found.</p>
           )}
         </CardContent>
       </Card>

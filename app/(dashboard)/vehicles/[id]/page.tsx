@@ -41,7 +41,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
               ? "Loading..."
               : `${vehicle?.year} ${vehicle?.make} ${vehicle?.model}`
           }
-          description={vehicle?.licensePlate}
+          description={vehicle?.registrationNumber}
         >
           {vehicle && <StatusBadge type="vehicle" status={vehicle.status} />}
         </PageHeader>
@@ -63,7 +63,7 @@ export default function VehicleDetailPage({ params }: { params: Promise<{ id: st
               showStatus
             />
           ) : (
-            <p className="text-gray-500">Vehicle not found.</p>
+            <p className="text-muted-foreground">Vehicle not found.</p>
           )}
         </CardContent>
       </Card>
